@@ -1,8 +1,21 @@
 version: '3.9'
-# As per https://www.metabase.com/docs/latest/operations-guide/running-metabase-on-docker.html
+# Derived from https://www.metabase.com/docs/latest/operations-guide/running-metabase-on-docker.html
 
 services:
-  metabase-secrets:
+  db:
+    image: postgres:13
+    container_name: db
+    hostname: db
+    environment:
+      POSTGRES_USER: ${DB_USER:-metabase}
+      POSTGRES_DB: ${DB_NAME:-metabase}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-metabase}
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data        
+    networks: 
+      - metabase
+
+  app:
     image: metabase/metabase:v0.39.4
     container_name: metabase-secrets
     hostname: metabase-secrets
@@ -17,39 +30,15 @@ services:
       MB_DB_PORT: 5432
       MB_DB_USER: ${DB_USER:-metabase}
       MB_DB_PASS: ${DB_PASSWORD:-metabase}
-      MB_DB_HOST: postgres-secrets
+      MB_DB_HOST: db
       JAVA_TIMEZONE: US/Pacific
     #   MUID=${UID-261162013}
     #   MGID=${GID-1839645156}      
     networks: 
-      - metanet1-secrets
+      - metabase
     depends_on: 
-      - postgres-secrets
-    # secrets:
-    #   - db_password
-    #   - db_user
-  postgres-secrets:
-    image: postgres:13
-    container_name: postgres-secrets
-    hostname: postgres-secrets
-    environment:
-      POSTGRES_USER: ${DB_USER:-metabase}
-      POSTGRES_DB: ${DB_NAME:-metabase}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-metabase}
-    volumes:
-      - ./postgresql/data:/var/lib/postgresql/data        
-    networks: 
-      - metanet1-secrets
-    # secrets:
-    #   - db_password
-    #   - db_user
+      - db
 
 networks: 
-  metanet1-secrets:
+  metabase:
     driver: bridge
-
-# secrets:
-#    db_password:
-#      file: db_password.txt
-#    db_user:
-#      file: db_user.txt

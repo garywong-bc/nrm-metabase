@@ -4,7 +4,7 @@ apiVersion: v1
 labels:
   app: "${NAME}"
   build: "${NAME}"
-  template: "${NAME}-bc-template"
+  template: "nrms-postgresql-bc"
 metadata:
   name: "${NAME}"
 objects:
